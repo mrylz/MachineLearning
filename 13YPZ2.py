@@ -54,22 +54,17 @@ X_train,X_test,y_train,y_test = train_test_split(X,y,test_size=0.02,random_state
 scaled = StandardScaler()
 X_train = scaled.fit_transform(X_train)
 X_test = scaled.transform(X_test)
-# küçük veri setini eğit
 sample_data = data.sample(n=1000, random_state=42)
 X_sample = sample_data.drop("price", axis=1)
 y_sample = sample_data["price"]
 
-# Küçük örnek için train-test split (yeni değişkenler)
 X_small_train, X_small_test, y_small_train, y_small_test = train_test_split(
     X_sample, y_sample, test_size=0.2, random_state=42
 )
 
-# Scale et (sadece küçük örnek)
 scaler = StandardScaler()
 X_small_train_scaled = scaler.fit_transform(X_small_train)
 X_small_test_scaled = scaler.transform(X_small_test)
-
-# LazyRegressor küçük örnek ile çalıştır
 reg = LazyRegressor()
 models, predictions = reg.fit(X_small_train_scaled, X_small_test_scaled, 
                                y_small_train, y_small_test)
