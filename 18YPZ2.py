@@ -57,7 +57,15 @@ corr_drop(X_test, 0.90)
 scaled = RobustScaler()
 X_train_scaled = scaled.fit_transform(X_train)
 X_test_scaled = scaled.transform(X_test)
-reg = RandomForestClassifier(n_estimators=100, random_state=15)
-reg.fit(X_train, y_train)
-y_pred = reg.predict(X_test)
+reg = RandomForestClassifier()
+rf_params = {"max_depth": [None, 10, 20, 30, 50],
+             "max_features": [5, 7, "auto", 8],
+             "min_samples_split": [2, 8, 15, 20],
+             "min_samples_leaf" : [1, 2,3,4], 
+             "n_estimators": [100, 200, 500, 1000]}
+rfc = RandomForestClassifier()
+rscv = RandomizedSearchCV(estimator=rfc, param_distributions=rf_params,n_iter=10,cv=3,verbose=2,n_jobs=1)
+rscv.fit(X_train, y_train)
+y_pred = rscv.predict(X_test) 
 print(f'Model accuracy score with default decision-trees : {accuracy_score(y_test, y_pred)}')
+print(classification_report(y_test,y_pred))
