@@ -23,6 +23,7 @@ from xgboost import XGBClassifier
 column_names = ['CRIM', 'ZN', 'INDUS', 'CHAS', 'NOX', 'RM', 'AGE', 'DIS', 'RAD', 'TAX', 'PTRATIO', 'B', 'LSTAT', 'MEDV']
 df = pd.read_csv("23-boston.csv", header=None, delimiter=r"\s+", names=column_names)
 print(df.info())
+"""
 def plot_all_histograms(df):
     num_cols = df.select_dtypes(include=[np.number]).columns
     n_cols = 3
@@ -40,3 +41,4 @@ def plot_all_histograms(df):
     plt.tight_layout()
     plt.show() 
 plot_all_histograms(df)
+"""
