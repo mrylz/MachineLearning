@@ -5,6 +5,7 @@ import seaborn as sns
 from sklearn.preprocessing import StandardScaler
 from lazypredict.Supervised import LazyClassifier,LazyRegressor
 from sklearn.model_selection import train_test_split,GridSearchCV
+from sklearn.ensemble import ExtraTreesClassifier
 pd.set_option('future.no_silent_downcasting', True)
 df = pd.read_csv("heart.csv")
 df['RestingBP'] = df['RestingBP'].replace(0,130)
@@ -50,13 +51,23 @@ X_train,X_test,y_train,y_test = train_test_split(X,y,test_size=0.3,random_state=
 scaler = StandardScaler()
 X_train = scaler.fit_transform(X_train)
 X_test = scaler.transform(X_test)
-lazy_clf = LazyClassifier(
-    verbose=0,
-    ignore_warnings=True,   # hataları yut, listede daha çok model dener
-    custom_metric=None,
-    random_state=42
-)
-models, predictions = lazy_clf.fit(X_train, X_test, y_train, y_test)
+param_grid = {
+    "n_estimators": [100, 200, 500],
+    "max_depth": [None, 10, 20, 30],
+    "max_features": ["sqrt", "log2"]
+}
 
-# Sonuçlar (accuracy, balanced_accuracy, ROC_AUC, F1 vb. uygun olana göre)
-print(models.sort_values("Accuracy", ascending=False).head(10))
+etc = ExtraTreesClassifier(random_state=42)
+grid = GridSearchCV(etc, param_grid, cv=5, scoring="balanced_accuracy", n_jobs=1,verbose=2)
+grid.fit(X_train, y_train)
+
+print("En iyi parametreler:", grid.best_params_)
+print("CV Balanced Accuracy:", grid.best_score_)
+print("Test Skoru:", grid.score(X_test, y_test))
+best_model = grid.best_estimator_
+
+feature_names = df.drop("HeartDisease", axis=1).columns
+importances = pd.Series(best_model.feature_importances_, index=feature_names)
+importances.sort_values(ascending=True).plot(kind="barh", figsize=(8,6))
+plt.title("Feature Importance - ExtraTreesClassifier")
+plt.show()

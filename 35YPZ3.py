@@ -2,9 +2,11 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
+from sklearn.metrics import accuracy_score,classification_report
 from sklearn.preprocessing import StandardScaler
 from lazypredict.Supervised import LazyClassifier,LazyRegressor
 from sklearn.model_selection import train_test_split,GridSearchCV
+from sklearn.ensemble import ExtraTreesClassifier
 pd.set_option('future.no_silent_downcasting', True)
 df = pd.read_csv("heart.csv")
 df['RestingBP'] = df['RestingBP'].replace(0,130)
@@ -50,13 +52,8 @@ X_train,X_test,y_train,y_test = train_test_split(X,y,test_size=0.3,random_state=
 scaler = StandardScaler()
 X_train = scaler.fit_transform(X_train)
 X_test = scaler.transform(X_test)
-lazy_clf = LazyClassifier(
-    verbose=0,
-    ignore_warnings=True,   # hataları yut, listede daha çok model dener
-    custom_metric=None,
-    random_state=42
-)
-models, predictions = lazy_clf.fit(X_train, X_test, y_train, y_test)
-
-# Sonuçlar (accuracy, balanced_accuracy, ROC_AUC, F1 vb. uygun olana göre)
-print(models.sort_values("Accuracy", ascending=False).head(10))
+reg = ExtraTreesClassifier(n_estimators=100,max_depth=10,max_features='sqrt')
+reg.fit(X_train,y_train)
+y_pred = reg.predict(X_test)
+print(accuracy_score(y_test,y_pred))
+print(classification_report(y_test,y_pred))
